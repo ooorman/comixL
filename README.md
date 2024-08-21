@@ -11,12 +11,11 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Новелл')
     comix = Comix(screen, scenarios_root='scenarios/', staticfiles_root='images/')
-    comix.process_frame()
     clock = pygame.time.Clock()
 
     while True:
         events = pygame.event.get()
-        comix.process_event(events)
+        comix.process_events(events)
 
         comix.update_screen()
         clock.tick(40)
