@@ -1,4 +1,10 @@
+import os.path
+import time
+
+import cv2
 import pygame
+import threading
+from moviepy.editor import VideoFileClip
 
 class ButtonStyle:
     def __init__(self, color, color_hover, font, outline=None):
@@ -95,3 +101,46 @@ class FlashTextPanel:
                     color = (255, 255, 255)
                 self.render_text_wrapped(color, (10, 10))
         self.screen.blit(self.panel, self.position)
+
+
+
+class Video:
+    def __init__(self, path, size, on_end):
+
+        if not os.path.exists(path):
+            raise Exception(f'Файл "{path}" не найден!')
+
+        self.cap = cv2.VideoCapture(path)
+        self.size = size
+        self.on_end = on_end
+
+        # Экстракция аудио и инициализация Pygame Mixer
+        self.audio_path = path.replace(".mp4", ".mp3")
+        VideoFileClip(path).audio.write_audiofile(self.audio_path)
+        self.audio_buffer = pygame.mixer.Sound(self.audio_path)
+
+        # Параметры для синхронизации видео и аудио
+        self.frame_duration = 1000 / self.cap.get(cv2.CAP_PROP_FPS)
+
+        # Инициализация переменной surface
+        self.surface = None
+
+        self.start_time = pygame.time.get_ticks()
+        threading.Thread(target=self.audio_buffer.play).start()
+
+
+    def update(self, screen):
+        # Синхронизация видео с аудио
+        current_frame = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+        expected_frame = int((pygame.time.get_ticks() - self.start_time) / self.frame_duration)
+
+        if current_frame < expected_frame:
+            ret, frame = self.cap.read()
+            if not ret: return self.on_end()
+
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = cv2.resize(frame, self.size)
+            self.surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+
+        if self.surface:
+            screen.blit(self.surface, (0, 0))

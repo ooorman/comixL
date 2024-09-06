@@ -1,25 +1,29 @@
 import json
 import re
-
 import pygame
 
-from widgetClasses.widgets import Button, ButtonStyle, FlashTextPanel
+from widgetClasses.widgets import Button, ButtonStyle, FlashTextPanel, Video
 
 
 class Comix:
 
     def __init__(self, screen, scenarios_root, staticfiles_root):
         pygame.init()
+        pygame.mixer.init()
 
+        self.null_sign = 0
         self.width, self.height = screen.get_size()
         self.screen = screen
         self.scenario = f'{scenarios_root}/main.txt'
         self.staticfiles_root = staticfiles_root
         self.scenarios_root = scenarios_root
-        self.command_number = 0
+        self.command_number = -1
         self.choice_buttons = pygame.sprite.Group()
+
         #widgets
         self.text_panel = None
+        self.video = None
+        self.background = None
 
         self.process_frame()
 
@@ -30,15 +34,14 @@ class Comix:
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONUP:
-                if event.button == pygame.BUTTON_LEFT and not self.choice_buttons:
+                if event.button == pygame.BUTTON_LEFT and not self.choice_buttons and not self.video:
                     if self.text_panel:
                         # дописать выводимый текст до конца
                         if self.text_panel.text_index < len(self.text_panel.text):
                             self.text_panel.text_index = len(self.text_panel.text) - 1
                             continue
                     # следующий фрейм
-                    self.command_number += 1
-                    self.process_frame()
+                    self.next_frame()
                     return
         self.choice_buttons.update(events)
 
@@ -62,9 +65,11 @@ class Comix:
             self.process_frame()
 
     def process_frame(self):
-
         with open(self.scenario, encoding='utf-8') as file:
+
             frames = [frame for frame in re.split(r'\d+\n', ''.join(file.readlines())) if frame]
+            if len(frames) - 1 <= self.command_number: return
+            self.command_number += 1
             current_frame = frames[self.command_number].replace('\n', '')
             commands = {}
             for command in current_frame.split(';'):
@@ -108,23 +113,36 @@ class Comix:
             place, text = commands['author'][0]
             author_panel = pygame.Surface((self.width, 150), flags=pygame.SRCALPHA)
             author_panel.set_alpha(200)
-            position = (0,0) if place == 'top' else (0, self.height - self.text_panel.get_height()) if place == 'bottom' else None
+            position = (0,0) if place == 'top' else (0, self.height - 150) if place == 'bottom' else None
             if not position: raise Exception('В местоположении надо писать top либо bottom!')
             self.text_panel = FlashTextPanel(self.screen, text, 40, author_panel, position)
         elif 'character' in commands:
             pos, size, fontsize, text = commands['character'][0]
             self.text_panel = FlashTextPanel(self.screen, text, fontsize, pygame.Surface(size, flags=pygame.SRCALPHA), pos, size=size)
+        if 'video' in commands:
+            self.video = Video(commands['video'][0][0], (self.width, self.height), self.next_frame)
+        if 'sound' in commands:
+            if commands['sound'][0][0] == self.null_sign:
+                pygame.mixer.music.stop()
+                return
+            loops = 0
+            if len(commands['sound'][0]) == 2: loops = -1 if commands['sound'][0][-1] == 'loop' else 0
+            pygame.mixer.music.load(self.staticfiles_root + commands['sound'][0][0])
+            pygame.mixer.music.play(loops=loops)
 
+
+    def next_frame(self):
+        self.video = None
+        return self.process_frame()
 
     def update_screen(self):
-        self.screen.fill((255,255,255))
-        self.screen.blit(self.background, (0, 0))
-        self.choice_buttons.draw(self.screen)
+        if not self.video:
+            self.screen.blit(self.background, (0, 0))
+
+        if self.choice_buttons:
+            self.choice_buttons.draw(self.screen)
 
         if self.text_panel:
             self.text_panel.draw()
-
-
+        if self.video: self.video.update(self.screen)
         pygame.display.flip()
-
-
