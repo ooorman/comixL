@@ -1,5 +1,5 @@
 # Настройка проекта
-Для начала работы необходимо создать новый проект, в который загрузить Engine.py и widgetClasses. После этого создать файл main.py и папки "images", "scenarios". В папке images будут размещаться изображения, в папке scenarios - сценарии. В каталоге scenarios создайте файл main.txt - точку входа для комикса. 
+Для начала работы необходимо создать новый проект, в который загрузить Engine.py и widgetClasses. После этого создать файл main.py и папки "media", "scenarios". В папке media будут размещаться папки медиафайлов, в папке scenarios - сценарии. В каталоге scenarios создайте файл main.txt - точку входа для комикса. 
 
 В main.py пропишите небольшую логику обработки игровых событий:
 ```
@@ -7,18 +7,14 @@ from Engine import Comix
 import pygame
 
 def main():
-    WIDTH, HEIGHT = 1920, 1000
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.SRCALPHA)
     pygame.display.set_caption('Новелл')
     comix = Comix(screen, scenarios_root='scenarios/', staticfiles_root='media/')
-    clock = pygame.time.Clock()
 
     while True:
         events = pygame.event.get()
         comix.process_events(events)
-
         comix.update_screen()
-        clock.tick(40)
 if __name__ == '__main__':
     main()
 ```
@@ -52,11 +48,30 @@ background:"images/image1.png";
 Пример кода:
 ```
 0
-video: "videos/video.mp4"
+video: "videos/video.mp4";
 ```
 Команда video позволяет добавить видео на передний план, по окончании которого фрейм переключиться на следующий. В качестве параметров принимает: относительный путь до видео.<br>
 Путь берётся относительно папки по пути, который мы указали в staticfiles_root. То есть, в данном примере видео возьмётся по пути "media/videos/video.mp4". Если разрешение видео и разрешение окна не совпадают, то видео растягивается до размеров окна.
 
+## audio
+Пример кода:
+```
+0
+audio: "audios/audio.mp3";
+```
+Команда audio позволяет добавить музыку, либо звук. При переключении фреймов звук продолжает играть, чтобы это предотвратить в фрейме, в котором нужно, чтобы звук перестал играть пропишите:
+```
+1
+audio: 0;
+```
+В качестве параметров принимает: относительный путь до аудио.<br>
+Путь берётся относительно папки по пути, который мы указали в staticfiles_root. То есть, в данном примере аудио возьмётся по пути "media/audios/audio.mp3".
+
+Чтобы зациклить звук, надо использовать флаг "loop". Пример:
+```
+0
+audio: "audios/audio.mp3", loop;
+```
 ## author
 Пример кода:
 ```
