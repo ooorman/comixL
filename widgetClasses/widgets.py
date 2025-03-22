@@ -1,10 +1,10 @@
 import os.path
-import time
+import queue
+import subprocess
 
 import cv2
 import pygame
 import threading
-from moviepy.editor import VideoFileClip
 
 class ButtonStyle:
     def __init__(self, color, color_hover, font, outline=None):
@@ -47,15 +47,15 @@ class Button(pygame.sprite.Sprite):
             if event.type == pygame.MOUSEBUTTONUP and hit:
                 return self.callback(self.str_fnc)
 
-
 class FlashTextPanel:
-    def __init__(self, screen, text, font_size, panel, position, size=None):
+    def __init__(self, screen, text, font_size, panel, position, size=None, color=None):
+        self.color = color
         self.text = text
         self.font = pygame.font.SysFont('Roboto', font_size)
         self.panel = panel
         self.position = position
         self.text_index = 0
-        self.text_speed = 0.002
+        self.text_speed = 0.01
         self.last_update_time = pygame.time.get_ticks()
         self.size = size
         self.is_character_talking = not(size is None)
@@ -65,10 +65,9 @@ class FlashTextPanel:
         if self.is_character_talking:
             border_width = 2
             pygame.draw.rect(self.panel, (0, 0, 0), pygame.Rect(0, 0, *self.size), border_radius=3)
-            pygame.draw.rect(self.panel, (255, 255, 255),
+            pygame.draw.rect(self.panel, (255, 255, 255) or self.color,
                              pygame.Rect(border_width, border_width, self.size[0] - border_width * 2,
                                          self.size[1] - border_width * 2), border_radius=3)
-
         else:
             self.panel.fill((0, 0, 0, 200))
 
@@ -102,45 +101,76 @@ class FlashTextPanel:
                 self.render_text_wrapped(color, (10, 10))
         self.screen.blit(self.panel, self.position)
 
-
-
 class Video:
-    def __init__(self, path, size, on_end):
-
+    def __init__(self, path, size):
         if not os.path.exists(path):
             raise Exception(f'Файл "{path}" не найден!')
 
         self.cap = cv2.VideoCapture(path)
         self.size = size
-        self.on_end = on_end
 
-        # Экстракция аудио и инициализация Pygame Mixer
-        self.audio_path = path.replace(".mp4", ".mp3")
-        VideoFileClip(path).audio.write_audiofile(self.audio_path)
-        self.audio_buffer = pygame.mixer.Sound(self.audio_path)
+        # Получение параметров видео
+        self.frame_rate = self.cap.get(cv2.CAP_PROP_FPS)
+        self.frame_duration = 1000 / self.frame_rate
 
-        # Параметры для синхронизации видео и аудио
-        self.frame_duration = 1000 / self.cap.get(cv2.CAP_PROP_FPS)
-
-        # Инициализация переменной surface
+        # Инициализация переменных
         self.surface = None
+        self.start_time = None
+        self.frame_index = 0
+        self.frame_queue = queue.Queue(maxsize=10)  # Буфер для кадров
+        self.stop_flag = False
 
-        self.start_time = pygame.time.get_ticks()
-        threading.Thread(target=self.audio_buffer.play).start()
+        # Поток для декодирования видео
+        self.video_thread = threading.Thread(target=self.decode_frames)
+        self.video_thread.start()
+
+        # Поток для воспроизведения звука
+        self.sound_thread = threading.Thread(target=self.play_sound, args=(path,))
+        self.sound_thread.start()
+
+    def play_sound(self, path):
+        sound_path = path.replace('.mp4', '.wav')
+
+        # Извлечение аудио с помощью FFmpeg и перезапись в тот же файл
+        command = [
+            "ffmpeg", "-i", path, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", sound_path, "-y"
+        ]
+        subprocess.run(command, stderr=subprocess.DEVNULL)
+
+        pygame.mixer.init()
+        pygame.mixer.music.load(sound_path)
+        pygame.mixer.music.play()
 
 
-    def update(self, screen):
-        # Синхронизация видео с аудио
-        current_frame = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
-        expected_frame = int((pygame.time.get_ticks() - self.start_time) / self.frame_duration)
+    def decode_frames(self):
+        while not self.stop_flag:
+            if self.frame_queue.full():
+                continue
 
-        if current_frame < expected_frame:
             ret, frame = self.cap.read()
-            if not ret: return self.on_end()
+            if not ret:
+                self.stop_flag = True
+                break
 
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = cv2.resize(frame, self.size)
-            self.surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+            self.frame_queue.put(frame)
+
+        self.cap.release()
+
+    def update(self, screen):
+        if self.start_time is None:
+            self.start_time = pygame.time.get_ticks()
+
+        # Синхронизация видео с аудио
+        current_time = pygame.time.get_ticks() - self.start_time
+        expected_frame_index = int(current_time / self.frame_duration)
+
+        if self.frame_index < expected_frame_index:
+            if not self.frame_queue.empty():
+                frame = self.frame_queue.get()
+                self.surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+                self.frame_index += 1
 
         if self.surface:
             screen.blit(self.surface, (0, 0))
