@@ -17,7 +17,7 @@ class Comix:
         self.scenario = f'{scenarios_root}/main.txt'
         self.staticfiles_root = staticfiles_root
         self.scenarios_root = scenarios_root
-        self.command_number = -1
+        self.command_number = 0
         self.choice_buttons = pygame.sprite.Group()
 
         #widgets
@@ -56,44 +56,45 @@ class Comix:
             else:
                 fnc_params.append(param)
         if fnc == 'goto':
-            #fnc:goto("new_file.txt", 5);
+            #fnc:goto("new_file.txt", 5)
             self.command_number = fnc_params[-1] if isinstance(fnc_params[-1], int) else 0
             scenario = fnc_params[0] if isinstance(fnc_params[0], str) else None
             if scenario:
                 self.scenario = f'{self.scenarios_root}{scenario}'
-
             self.process_frame()
 
     def process_frame(self):
         with open(self.scenario, encoding='utf-8') as file:
+            frames = [frame for frame in re.split(r'^\d+|(?:\n\d+\n)', ''.join(file.readlines())) if frame]
 
-            frames = [frame for frame in re.split(r'\d+\n', ''.join(file.readlines())) if frame]
-            if len(frames) - 1 <= self.command_number: return
-            self.command_number += 1
-            current_frame = frames[self.command_number].replace('\n', '')
-            commands = {}
-            for command in current_frame.split(';'):
-                if command:
-                    key, value = command.split(':', 1)
-                    key = key.strip()
-                    commands[key] = []
-                    for params in re.split(r'\s*\|\s*', value.strip()):
-                        param_list = []
-                        regex = r'\s*,\s*' + ''.join([r'(?=(?:(?:[^{left}\\]|(?:\\{left}))*{right}(?:[^{right}\\]|(?:\\{right}))*{left})*(?!(?:[^{left}\\]|(?:\\{left}))*{right}))'.format(left=sign[0],right=sign[1]) for sign in [['"', '"'], [r'\[', r'\]'], [r'\(', r'\)']] ])
-                        for param in re.split(regex, params):
-                            if re.match(r'^[\["]', param):
-                                param_list.append(json.loads(param))
-                            elif param.isdigit():
-                                param_list.append(int(param))
-                            else:
-                                param_list.append(param)
-                        commands[key].append(param_list)
+        current_frame = frames[self.command_number]
+        commands = {}
+        for command in current_frame.split('\n'):
+            if command:
+                key, value = command.split(':', 1)
+                key = key.strip()
+                commands[key] = []
+                for params in re.split(r'\s*\|\s*', value.strip()):
+                    param_list = []
+                    regex = r'\s*,\s*' + ''.join([r'(?=(?:(?:[^{left}\\]|(?:\\{left}))*{right}(?:[^{right}\\]|(?:\\{right}))*{left})*(?!(?:[^{left}\\]|(?:\\{left}))*{right}))'.format(left=sign[0],right=sign[1]) for sign in [['"', '"'], [r'\[', r'\]'], [r'\(', r'\)']] ])
+
+                    for param in re.split(regex, params):
+                        if param[0].startswith('['):
+                            param_list.append(json.loads(param))
+                        elif param[0].startswith('"'):
+                            param_list.append(param[1:-1])
+                        elif param.isdigit():
+                            param_list.append(int(param))
+                        else:
+                            param_list.append(param)
+                    commands[key].append(param_list)
+
         if 'author' in commands and 'character' in commands: raise Exception('Свойства author и character несовместимы!')
 
         if 'background' in commands:
             self.background = pygame.transform.scale(pygame.image.load(f'{self.staticfiles_root}{commands['background'][0][0]}'), (self.width, self.height))
         if 'choice' in commands:
-            button_styles = ButtonStyle((0, 255, 0), (0, 128, 0), pygame.font.SysFont('comicsans', 18), outline=(0, 0, 0))
+
 
             def delete_choice_buttons(func):
                 def inner(*args, **kwargs):
@@ -102,37 +103,51 @@ class Comix:
 
                 return inner
             for command_params in commands['choice']:
-                func, text, position = command_params
-                rect = pygame.Rect(*position, 200, 70)
+                func, text, position, size, color, font_size = command_params
+                button_styles = ButtonStyle(color, [color[0]//2, color[1] // 2, color[2] // 2], pygame.font.SysFont('comicsans', font_size), outline=(0, 0, 0))
+                rect = pygame.Rect(self.width * position[0], self.height * position[1], self.width * size[0], self.height * size[1])
 
                 button = Button(button_styles, rect, text=text, callback=delete_choice_buttons(self.process_function), str_fnc=func )
                 self.choice_buttons.add(button)
         if 'fnc' in commands:
             self.process_function(commands['fnc'][0][0])
         if 'author' in commands:
-            place, text = commands['author'][0]
-            author_panel = pygame.Surface((self.width, 150), flags=pygame.SRCALPHA)
-            author_panel.set_alpha(200)
-            position = (0,0) if place == 'top' else (0, self.height - 150) if place == 'bottom' else None
-            if not position: raise Exception('В местоположении надо писать top либо bottom!')
-            self.text_panel = FlashTextPanel(self.screen, text, 40, author_panel, position)
+            if commands['author'][0][0] == self.null_sign:
+                self.text_panel = None
+            else:
+                place, text = commands['author'][0]
+
+                panel_height = 200
+                author_panel = pygame.Surface((self.width, panel_height), flags=pygame.SRCALPHA)
+                author_panel.set_alpha(230)
+                position = (0,0) if place == 'top' else (0, self.height - panel_height) if place == 'bottom' else None
+                if not position: raise Exception('В местоположении надо писать top либо bottom!')
+                self.text_panel = FlashTextPanel(self.screen, text, 40, author_panel, position)
         elif 'character' in commands:
-            pos, size, fontsize, text = commands['character'][0]
-            self.text_panel = FlashTextPanel(self.screen, text, fontsize, pygame.Surface(size, flags=pygame.SRCALPHA), pos, size=size)
+            if commands['character'][0][0] == self.null_sign:
+                self.text_panel = None
+            else:
+                text, pos, size, color, fontsize = commands['character'][0]
+                self.text_panel = FlashTextPanel(self.screen, text, fontsize, pygame.Surface([self.width * size[0], self.height * size[1]], flags=pygame.SRCALPHA), [self.width * pos[0], self.height * pos[1]], size=[self.width * size[0], self.height * size[1]], color=color)
         if 'video' in commands:
-            self.video = Video(commands['video'][0][0], (self.width, self.height), self.next_frame)
+            self.video = Video(commands['video'][0][0], (self.width, self.height))
         if 'sound' in commands:
             if commands['sound'][0][0] == self.null_sign:
                 pygame.mixer.music.stop()
-                return
-            loops = 0
-            if len(commands['sound'][0]) == 2: loops = -1 if commands['sound'][0][-1] == 'loop' else 0
-            pygame.mixer.music.load(self.staticfiles_root + commands['sound'][0][0])
-            pygame.mixer.music.play(loops=loops)
-
+            else:
+                loops = 0
+                if len(commands['sound'][0]) == 2: loops = -1 if commands['sound'][0][-1] == 'loop' else 0
+                pygame.mixer.music.load(self.staticfiles_root + commands['sound'][0][0])
+                pygame.mixer.music.play(loops=loops)
 
     def next_frame(self):
         self.video = None
+        with open(self.scenario, encoding='utf-8') as file:
+            frames = [frame for frame in re.split(r'^\d+|(?:\n\d+\n)', ''.join(file.readlines())) if frame]
+
+        if len(frames) - 1 <= self.command_number: exit()
+        self.command_number += 1
+
         return self.process_frame()
 
     def update_screen(self):
@@ -144,5 +159,6 @@ class Comix:
 
         if self.text_panel:
             self.text_panel.draw()
-        if self.video: self.video.update(self.screen)
+        if self.video:
+            if self.video.update(self.screen): self.next_frame()
         pygame.display.flip()
