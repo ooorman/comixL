@@ -1,0 +1,49 @@
+0
+author: bottom, "Да!"
+sound: "sounds/happy.wav", loop
+background: "images/black.png"
+1
+author: 0
+background: "images/positive/1.png"
+2
+background: "images/positive/2.png"
+choice: goto(3), "Наладить отношения.", [0.7, 0.7], [0.17, 0.08], [255,255, 255], 20
+3
+background: "images/positive/3.png"
+4
+background: "images/positive/4.png"
+choice: goto(5), "Найти любимое дело.", [0.4, 0.4], [0.17, 0.08], [255,255, 255], 20
+5
+background: "images/positive/5.png"
+choice: goto(6), "Принять себя.", [0.2, 0.5], [0.17, 0.08], [255,255, 255], 20
+6
+background: "images/positive/6.png"
+7
+background: "images/positive/7.png"
+choice: goto(8), "Открыться миру", [0.8, 0.3], [0.17, 0.08], [255,255, 255], 20
+8
+background: "images/positive/8.png"
+9
+background: "images/positive/9.png"
+10
+background: "images/positive/10.png"
+11
+author: bottom, "Новый год - праздник, который я когда-то отмечал..."
+12
+author: bottom, "Который я ждал, который я любил и ценил."
+13
+author: bottom, "Сегодня он спас меня."
+14
+author: bottom, "Он подарил мне надежду, он подарил мне стимул бороться!"
+15
+author: bottom, "Хоть это и бессмысленный праздник, придуманный людьми для отвлечения от повседневной рутины, он смог меня изменить."
+16
+author: bottom, "Теперь я по-настоящему счастлив!"
+14
+author: bottom, "C Новым 2025 годом!"
+15
+background: "images/positive/11.png"
+author: 0
+16
+sound: 0
+author: bottom, "Свободен..."

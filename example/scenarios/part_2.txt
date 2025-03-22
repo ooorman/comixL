@@ -1,0 +1,118 @@
+0
+sound: "sounds/step.wav"
+background: "images/black.png"
+1
+sound: "sounds/silent_rain.wav", loop
+2
+background: "images/part_2/1.png"
+3
+background: "images/part_2/1.1.png"
+4
+author: bottom, "Опять этот потолок..."
+5
+author: bottom, "Немой наблюдатель моей жалкой жизни."
+6
+author: bottom, "Наверное, он меня ненавидит. Я бы себя ненавидел."
+7
+author: bottom, "Ещё один день, ещё один бессмысленный день."
+8
+author: 0
+9
+background: "images/part_2/2.png"
+author: bottom, "Умыться."
+sound: "sounds/part_2/pouring water.mp3"
+10
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Поесть."
+11
+author: bottom, "Ждать?"
+background: "images/part_2/4.png"
+sound: "sounds/part_2/clock.wav", loop
+12
+author: bottom, "А если я не хочу ждать?"
+background: "images/part_2/5.png"
+13
+sound: 0
+author: 0
+background: "images/black.png"
+14
+author: bottom, "Точно! Сегодня же 31 декабря!"
+15
+background: "images/part_2/6.png"
+sound: "sounds/part_2/new_year.wav", loop
+author: bottom, "Новый год на носу."
+16
+author: bottom, "А ведь было время, когда я его отмечал."
+17
+author: bottom, "Мы собирались всей семьёй. Мама что-то готовила на кухне, отец бесконечно отвечал на телефонные звонки, братик ждал прихода Деда Мороза."
+18
+author: bottom, "Стол был забит едой! Окна распахнуты. Дух торжества витал в воздухе."
+19
+author: bottom, "Дух безутешных надежд, подкрепленный слепой верой в изменения..."
+sound: 0
+20
+background: "images/part_2/7.png"
+sound: 0
+author: bottom, "Уже ничего не вернуть..."
+21
+author: bottom, "Брат уехал в другой город, отец с матерью разошлись."
+22
+author: bottom, "Все оставили меня."
+23
+author: bottom, "Я совсем один..."
+24
+author: 0
+background: "images/part_2/8.1.png"
+sound: "sounds/step.wav"
+25
+background: "images/part_2/8.2.png"
+sound: "sounds/step.wav"
+26
+background: "images/part_2/8.3.png"
+sound: "sounds/step.wav"
+27
+author: bottom, "Я ненавижу вас"
+28
+background: "images/black.png"
+sound: "sounds/step.wav"
+author: 0
+29
+sound: "sounds/ordinary.wav", loop
+background: "images/part_2/9.1.png"
+30
+background: "images/part_2/9.2.png"
+31
+background: "images/part_2/9.3.png"
+32
+character: "помогите...", [0.5,0.9], [0.07, 0.05], [255,255,255], 25
+33
+character: "помогите...", [0.5,0.9], [0.07, 0.05], [255,255,255], 25
+34
+character: "помогит...", [0.5,0.9], [0.07, 0.05], [255,255,255], 25
+35
+author: top, "Это я?"
+36
+author: top, "Кажется, да"
+37
+author: top, "Я. Потерянный, сломленный, разбитый."
+38
+author: top, "Побоявшийся трудностей, не выдержавший испытаний. Сдавшийся..."
+39
+author: top, "Жалкий... Жалкий! Жалкий!"
+40
+author: top, "Закрылся ото всех, думал, что так будет лучше. Спрятался в тени, лишь бы только не попасть под ослепительный свет будущего."
+41
+author: top, "Ждал пока перемены сами настигнут меня. А пока я ничего не делал, время шло, забывая всё, чему я был рад, что любил."
+42
+author: top, "Семью, друзей. Брата."
+43
+author: top, "Помнят ли они меня?"
+44
+author: top, "Ведь я всё ещё люблю их..."
+45
+author: top, "О боже... Кем я стал..."
+46
+author: top, "Могу ли я хоть что-то изменить?"
+47
+choice: goto("positive.txt"), "Продолжить", [0.47, 0.36], [0.053, 0.05], [42,170,255], 16 | goto("negative.txt"), "Сдаться", [0.48, 0.8], [0.05, 0.05], [255,255,255], 16

@@ -1,0 +1,46 @@
+0
+background: "images/part_1/1.png"
+sound: "sounds/ordinary.wav", loop
+1
+author: bottom, "Что это такое?"
+2
+author: bottom, "Какое-то странное чувство."
+3
+background: "images/part_1/2.png"
+author: bottom, "Неужели я..."
+4
+author: 0
+sound: 0
+5
+background: "images/part_1/3.png"
+sound: "sounds/calm_piano.wav", loop
+6
+author: bottom, "Может со мной что-то не так?"
+7
+author: bottom, ""Нормальные люди", увидев меня, бы просто посмеялись..."
+8
+author: bottom, "Сижу тут целыми днями, трачу зря свою жизнь."
+9
+author: bottom, "Вроде бы всё, что нужно для жизни есть, но в душе пустота."
+10
+author: bottom, "Странная, непонятная пустота..."
+11
+author: bottom, "Так и норовит сделать хоть что-то, но тело сопротивляется."
+12
+author: bottom, "Тело против."
+13
+sound: "sounds/part_1/kashel.wav"
+14
+sound: "sounds/part_1/astma breathe.mp3"
+background: "images/part_1/3.1.png"
+15
+background: "images/part_1/3.png"
+author: bottom, "Опять..."
+16
+author: 0
+background: "images/part_1/4.png"
+sound: "sounds/step.wav"
+17
+background: "images/part_1/5.png"
+sound: "sounds/step.wav"
+choice: goto("part_2.txt"), "Забыться", [0.1, 0.8], [0.1, 0.1], [106,106,106], 40

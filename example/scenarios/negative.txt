@@ -1,0 +1,113 @@
+0
+author: top, "Нет."
+sound: 0
+1
+background: "images/negative/1.png"
+sound: "sounds/step.wav"
+2
+background: "images/negative/2.png"
+sound: "sounds/step.wav"
+3
+author: 0
+background: "images/black.png"
+sound: "sounds/step.wav"
+4
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+5
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+6
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+7
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+8
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+9
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+10
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+11
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+12
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+13
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+14
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+15
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+16
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+17
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+18
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+19
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+20
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+21
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+22
+background: "images/part_2/3.png"
+sound: "sounds/part_2/peep.mp3"
+author: bottom, "Есть."
+23
+author: bottom, "Ждать."
+background: "images/part_2/5.png"
+sound: "sounds/part_2/clock.wav", loop
+24
+author: bottom, "Спать."
+background: "images/black.png"
+sound: 0
+25
+author: 0
+choice: goto(4), "Жить", [0.1, 0.4], [0.3, 0.1], [0, 255, 0], 30 | goto(26), "Умереть", [0.6, 0.4], [0.3, 0.1], [255, 0, 0], 30
+26
+sound: "sounds/negative/wind.mp3", loop
+background: "images/negative/3.png"
+28
+background: "images/negative/4.png"
+29
+background: "images/negative/5.png"
+30
+background: "images/negative/6.png"
+31
+sound: 0
+background: "images/black.png"
+author: bottom, "Свободен..."
